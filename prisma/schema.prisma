@@ -1,0 +1,135 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum OrderStatus {
+  BARU
+  DIPROSES
+  DIKIRIM
+  SELESAI
+  DIBATALKAN
+}
+
+enum StockMutationType {
+  STOK_MASUK
+  STOK_KELUAR
+  PENYESUAIAN
+}
+
+enum CampaignPlatform {
+  SHOPEE_ADS
+  TIKTOK_ADS
+  OFFLINE_CAMPAIGN
+}
+
+enum UserRole {
+  ADMIN
+  KARYAWAN
+}
+
+model User {
+  id        String   @id @default(cuid())
+  nama      String
+  email     String   @unique
+  password  String
+  role      UserRole @default(KARYAWAN)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Category {
+  id        String    @id @default(cuid())
+  name      String    @unique
+  products  Product[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Product {
+  id             String         @id @default(cuid())
+  sku            String         @unique
+  namaProduk     String
+  kategori       Category       @relation(fields: [kategoriId], references: [id])
+  kategoriId     String
+  hargaModal     Int
+  hargaJual      Int
+  stok           Int            @default(0)
+  fotoProduk     String?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  orderItems     OrderItem[]
+  stockHistories StockHistory[]
+
+  @@index([namaProduk])
+  @@index([kategoriId])
+}
+
+model Order {
+  id             String      @id @default(cuid())
+  nomorInvoice   String      @unique
+  tanggal        DateTime    @default(now())
+  pelanggan      String
+  status         OrderStatus @default(BARU)
+  total          Int
+  items          OrderItem[]
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+}
+
+model OrderItem {
+  id        String  @id @default(cuid())
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  orderId   String
+  product   Product @relation(fields: [productId], references: [id])
+  productId String
+  qty       Int
+  harga     Int
+  subtotal  Int
+}
+
+model Supplier {
+  id             String         @id @default(cuid())
+  name           String         @unique
+  phone          String?
+  address        String?
+  stockHistories StockHistory[]
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+}
+
+model StockHistory {
+  id         String            @id @default(cuid())
+  tanggal    DateTime          @default(now())
+  produk     Product           @relation(fields: [produkId], references: [id])
+  produkId   String
+  tipe       StockMutationType
+  qty        Int
+  supplier   Supplier?         @relation(fields: [supplierId], references: [id])
+  supplierId String?
+  catatan    String?
+  createdAt  DateTime          @default(now())
+
+  @@index([tanggal])
+  @@index([produkId])
+}
+
+model Campaign {
+  id          String           @id @default(cuid())
+  platform    CampaignPlatform
+  campaign    String
+  tanggal     DateTime         @default(now())
+  biayaIklan  Int
+  leads       Int
+  conversion  Int
+  penjualan   Int
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  @@index([tanggal])
+  @@index([platform])
+}
