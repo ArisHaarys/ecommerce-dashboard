@@ -18,7 +18,7 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pag
   const kategori = String(params.kategori || "");
   const { page, pageSize, skip } = getPagination(params);
 
-  const [categories, products, total] = await Promise.all([
+  const [categories, products, total, sales] = await Promise.all([
     prisma.category.findMany({ orderBy: { name: "asc" } }),
     prisma.product.findMany({
       where: {
@@ -36,9 +36,20 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pag
         ...(kategori ? { kategoriId: kategori } : {}),
       },
     }),
+    prisma.orderItem.groupBy({
+      by: ["productId"],
+      _sum: {
+      qty: true,
+    },
+  }),
   ]);
   const totalPages = Math.max(Math.ceil(total / pageSize), 1);
-
+  const soldMap = new Map(
+  sales.map((item) => [
+    item.productId,
+    item._sum.qty || 0,
+  ])
+);
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
@@ -91,6 +102,7 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pag
                 <th>Modal</th>
                 <th>Jual</th>
                 <th>Stok</th>
+                <th>Terjual</th>
                 <th>Dibuat</th>
                 <th className="text-right">Aksi</th>
               </tr>
@@ -111,6 +123,7 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pag
                   <td>{formatCurrency(product.hargaModal)}</td>
                   <td>{formatCurrency(product.hargaJual)}</td>
                   <td>{product.stok}</td>
+                  <td>{soldMap.get(product.id) || 0}</td>
                   <td>{formatDate(product.createdAt)}</td>
                   <td>
   <div className="flex justify-end gap-2">

@@ -24,51 +24,65 @@ export const authOptions: NextAuthOptions = {
       },
 
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) {
-          return null;
-        }
+  console.log("LOGIN ATTEMPT:", credentials?.email);
 
-        const user = await prisma.user.findUnique({
-          where: {
-            email: credentials.email,
-          },
-        });
+  if (!credentials?.email || !credentials?.password) {
+    return null;
+  }
 
-        if (!user) {
-          return null;
-        }
+  console.log("EMAIL:", credentials.email);
+  console.log("PASSWORD:", credentials.password);
 
-        const validPassword = await compare(
-          credentials.password,
-          user.password
-        );
+  const user = await prisma.user.findUnique({
+    where: {
+      email: credentials.email,
+    },
+  });
 
-        if (!validPassword) {
-          return null;
-        }
+  console.log("USER FOUND:", user);
 
-        return {
-          id: user.id,
-          name: user.nama,
-          email: user.email,
-          role: user.role,
-        };
-      },
+  if (!user) {
+    return null;
+  }
+
+  const validPassword = await compare(
+    credentials.password,
+    user.password
+  );
+
+  console.log("PASSWORD VALID:", validPassword);
+
+  if (!validPassword) {
+    return null;
+  }
+
+  return {
+    id: user.id,
+    name: user.nama,
+    email: user.email,
+    role: user.role,
+  };
+}
     }),
   ],
 
   callbacks: {
-    async jwt({ token, user }) {
-      if (user) {
-        (token as any).role = (user as any).role;
-      }
+  jwt({ token, user }) {
+  if (user) {
+    token.id = user.id;
+    token.role = user.role;
+  }
 
-      return token;
-    },
+  return token;
+},
 
-    async session({ session, token }) {
-      (session.user as any).role = (token as any).role;
-      return session;
-    },
+    session({ session, token }) {
+  if (session.user) {
+    session.user.id = token.id as string;
+    session.user.role = token.role as string;
+  }
+
+  return session;
+},
   },
 };

@@ -77,15 +77,22 @@ export async function createOrder(formData: FormData) {
   const nomorInvoice = String(formData.get("nomorInvoice") || `INV-${Date.now()}`).trim();
   const tanggal = new Date(String(formData.get("tanggal") || new Date().toISOString()));
   const pelanggan = String(formData.get("pelanggan") || "").trim();
+  const platform = String(
+  formData.get("platform") || "OFFLINE"
+  );
+  const marketplaceOrderId = String(
+  formData.get("marketplaceOrderId") || ""
+  ).trim();
   const status = formData.get("status") as OrderStatus;
-
   await prisma.$transaction(async (tx) => {
     if (!productId) {
       await tx.order.create({
-        data: {
+          data: {
           nomorInvoice,
           tanggal,
           pelanggan,
+          platform,
+          marketplaceOrderId,
           status,
           total: toNumber(formData.get("total")),
         },
@@ -117,6 +124,8 @@ export async function createOrder(formData: FormData) {
         nomorInvoice,
         tanggal,
         pelanggan,
+        platform,
+        marketplaceOrderId,
         status,
         total,
         items: {

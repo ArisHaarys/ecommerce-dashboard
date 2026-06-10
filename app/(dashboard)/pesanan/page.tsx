@@ -53,12 +53,42 @@ export default async function OrdersPage() {
               <Input name="tanggal" type="date" required />
             </Field>
             <Field>
-              <Label>Pelanggan</Label>
-              <Input name="pelanggan" required />
-            </Field>
-            <Field>
-              <Label>Status</Label>
-              <Select name="status" defaultValue="BARU">
+  <Label>Pelanggan</Label>
+  <Input name="pelanggan" required />
+</Field>
+
+<Field>
+  <Label>Platform</Label>
+  <Select
+    name="platform"
+    defaultValue="OFFLINE"
+  >
+    <option value="OFFLINE">
+      Offline
+    </option>
+
+    <option value="SHOPEE">
+      Shopee
+    </option>
+
+    <option value="TIKTOK">
+      TikTok
+    </option>
+  </Select>
+</Field>
+
+<Field>
+  <Label>Order ID Marketplace</Label>
+
+  <Input
+    name="marketplaceOrderId"
+    placeholder="Opsional"
+  />
+</Field>
+
+<Field>
+  <Label>Status</Label>
+  <Select name="status" defaultValue="BARU">
                 {statuses.map((status) => <option key={status} value={status}>{orderStatusLabel(status)}</option>)}
               </Select>
             </Field>
@@ -95,6 +125,8 @@ export default async function OrdersPage() {
                 <th className="py-3">Invoice</th>
                 <th>Tanggal</th>
                 <th>Pelanggan</th>
+                <th>Platform</th>
+                <th>Order ID</th>
                 <th>Status</th>
                 <th>Total</th>
                 <th className="text-right">Aksi</th>
@@ -106,6 +138,9 @@ export default async function OrdersPage() {
                   <td className="py-3 font-medium"><Link href={`/pesanan/${order.id}`}>{order.nomorInvoice}</Link></td>
                   <td>{formatDate(order.tanggal)}</td>
                   <td>{order.pelanggan}</td>
+                  <td>{order.platform}</td>
+                  <td>{order.marketplaceOrderId || "-"}</td>
+                  
                   <td>
                     <form action={updateOrderStatus.bind(null, order.id)} className="flex items-center gap-2">
                       <Select name="status" defaultValue={order.status} className="w-36">

@@ -9,6 +9,8 @@ import {
   Megaphone,
   Settings,
   Warehouse,
+  Users,
+  FileText,
 } from "lucide-react";
 
 function getNavigation(role?: string) {
@@ -24,7 +26,9 @@ function getNavigation(role?: string) {
   if (role === "ADMIN") {
     navigation.push(
       { href: "/iklan", label: "Rekap Iklan", icon: Megaphone },
-      { href: "/settings", label: "Setting", icon: Settings }
+      { href: "/settings", label: "Setting", icon: Settings },
+      { href: "/users", label: "Users", icon: Users },
+      { href: "/logs", label: "Activity Log", icon: FileText }
     );
   }
 

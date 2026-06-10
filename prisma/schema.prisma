@@ -42,6 +42,15 @@ model User {
   updatedAt DateTime @updatedAt
 }
 
+model ActivityLog {
+  id          String   @id @default(cuid())
+  userId      String?
+  userName    String
+  action      String
+  description String
+  createdAt   DateTime @default(now())
+}
+
 model Category {
   id        String    @id @default(cuid())
   name      String    @unique
@@ -74,6 +83,8 @@ model Order {
   nomorInvoice   String      @unique
   tanggal        DateTime    @default(now())
   pelanggan      String
+  platform       String?     @default("OFFLINE")
+  marketplaceOrderId String?
   status         OrderStatus @default(BARU)
   total          Int
   items          OrderItem[]

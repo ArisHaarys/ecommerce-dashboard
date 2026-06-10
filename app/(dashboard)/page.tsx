@@ -5,6 +5,8 @@ import { prisma } from "@/lib/prisma";
 import { formatCurrency } from "@/lib/utils";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { createUser, deleteUser } from "@/lib/actions/user-actions";
+import { Trash2 } from "lucide-react";
 
 
 export default async function DashboardPage() {

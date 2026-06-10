@@ -7,6 +7,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { toNumber } from "@/lib/utils";
+import { createLog } from "@/lib/activity-log";
 
 async function saveProductPhoto(file: FormDataEntryValue | null) {
   if (!(file instanceof File) || file.size === 0) return undefined;
@@ -44,6 +45,11 @@ export async function createProduct(formData: FormData) {
     },
   });
 
+  await createLog(
+  "CREATE_PRODUCT",
+  `Menambahkan produk ${String(formData.get("namaProduk"))}`
+);
+
   revalidatePath("/produk");
   redirect("/produk");
 }
@@ -71,12 +77,21 @@ export async function updateProduct(id: string, formData: FormData) {
     },
   });
 
+  await createLog(
+  "UPDATE_PRODUCT",
+  `Mengubah produk ${String(formData.get("namaProduk"))}`
+);
+
   revalidatePath("/produk");
   redirect("/produk");
 }
 
 export async function deleteProduct(id: string) {
   await requireAdmin();
+
+  const product = await prisma.product.findUnique({
+  where: { id },
+});
 
   const stockCount = await prisma.stockHistory.count({
   where: {
@@ -99,5 +114,12 @@ if (stockCount > 0 || orderCount > 0) {
 await prisma.product.delete({
   where: { id },
 });
+
+await createLog(
+  "DELETE_PRODUCT",
+  `Menghapus produk ${product?.namaProduk}`
+);
+
  revalidatePath("/produk");
 }
+

@@ -8,5 +8,7 @@ export const config = {
     "/stok/:path*",
     "/iklan/:path*",
     "/settings/:path*",
+    "/users/:path*",
+    "/logs/:path*",
   ],
 };
